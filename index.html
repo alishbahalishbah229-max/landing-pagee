@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NeuralShield NIDS | Next-Gen Intrusion Detection</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- GSAP for advanced animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0c12;
+            color: #f0f3fa;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        /* Custom sleek scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f1219; }
+        ::-webkit-scrollbar-thumb { background: #3b4e6b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5d7c9e; }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff, #8bb4ff, #5d9eff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .section-subhead {
+            color: #9aa9c9;
+            max-width: 680px;
+            margin-bottom: 56px;
+            font-size: 1.15rem;
+            border-left: 3px solid #3b82f6;
+            padding-left: 20px;
+        }
+
+        /* Glassmorphic Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            background: rgba(8, 12, 20, 0.75);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 18px 0;
+            transition: all 0.3s;
+        }
+        .nav-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo {
+            font-size: 1.9rem;
+            font-weight: 800;
+            background: linear-gradient(125deg, #ffffff, #5d9eff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo i {
+            color: #3b82f6;
+            margin-right: 8px;
+            filter: drop-shadow(0 0 6px #3b82f6);
+        }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            color: #cfdfed;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: #3b82f6;
+            transition: 0.3s;
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover { color: white; }
+        .nav-buttons {
+            display: flex;
+            gap: 14px;
+        }
+        .btn-outline-glass {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(59,130,246,0.5);
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s;
+            backdrop-filter: blur(4px);
+        }
+        .btn-outline-glass:hover {
+            background: rgba(59,130,246,0.2);
+            border-color: #3b82f6;
+            box-shadow: 0 0 12px rgba(59,130,246,0.3);
+        }
+        .btn-primary-glow {
+            background: linear-gradient(95deg, #2563eb, #3b82f6);
+            border: none;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            transition: all 0.2s;
+        }
+        .btn-primary-glow:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(59,130,246,0.6);
+        }
+
+        /* Hero with 3D */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 100px;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        .hero-content h1 {
+            font-size: 3.8rem;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #fff, #a5c9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero-content p {
+            font-size: 1.2rem;
+            color: #b9c7e3;
+            margin: 24px 0 36px;
+        }
+        .robot-3d-container {
+            width: 100%;
+            height: 460px;
+            border-radius: 48px;
+            background: radial-gradient(circle at 30% 20%, #0b1120, #010208);
+            box-shadow: 0 30px 40px -20px black;
+            border: 1px solid rgba(59,130,246,0.3);
+            overflow: hidden;
+        }
+
+        /* Cards modern */
+        .features-grid, .methods-grid, .tools-grid, .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 35px;
+            margin-top: 20px;
+        }
+        .card-neumorph {
+            background: rgba(15, 23, 36, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            padding: 32px 26px;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(72, 99, 144, 0.3);
+            box-shadow: 0 10px 25px -12px rgba(0,0,0,0.5);
+        }
+        .card-neumorph:hover {
+            transform: translateY(-8px);
+            border-color: #3b82f6;
+            background: rgba(20, 30, 50, 0.8);
+            box-shadow: 0 20px 30px -12px #0f172a;
+        }
+        .card-neumorph i {
+            font-size: 3rem;
+            background: linear-gradient(145deg, #90b4ff, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+
+        /* Alert Demo */
+        .alert-strip {
+            background: linear-gradient(145deg, #0f1425, #070b17);
+            border-radius: 40px;
+            padding: 30px;
+        }
+        .alert-item {
+            background: #111a2c;
+            border-left: 5px solid #ef4444;
+            padding: 18px 22px;
+            border-radius: 24px;
+            margin: 18px 0;
+            transition: 0.2s;
+        }
+        .chart-bar {
+            background: #0f172f;
+            border-radius: 28px;
+            padding: 22px;
+        }
+        .bar-fill {
+            background: linear-gradient(90deg, #3b82f6, #a855f7);
+            height: 8px;
+            border-radius: 8px;
+            width: 0%;
+            transition: width 1.2s ease-out;
+        }
+
+        /* Contact Modal (instead of inline form) */
+        .contact-trigger-btn {
+            background: linear-gradient(95deg, #2563eb, #3b82f6);
+            border: none;
+            padding: 14px 38px;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 8px 20px rgba(37,99,235,0.4);
+            transition: 0.2s;
+        }
+        .contact-trigger-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 28px rgba(59,130,246,0.6);
+        }
+
+        /* Global Modal Premium */
+        .modal-premium {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(14px);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-container {
+            background: #0e1625;
+            border-radius: 52px;
+            width: 90%;
+            max-width: 480px;
+            padding: 40px;
+            border: 1px solid rgba(59,130,246,0.6);
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+            transform: scale(0.9);
+            transition: transform 0.25s ease;
+        }
+        .modal-container h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .modal-container input, .modal-container textarea {
+            width: 100%;
+            padding: 14px 18px;
+            margin: 12px 0;
+            background: #1a2338;
+            border: 1px solid #2f4168;
+            border-radius: 40px;
+            color: white;
+            font-size: 1rem;
+        }
+        .modal-container textarea { border-radius: 28px; resize: vertical; }
+        .close-modal-btn {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        footer {
+            background: #04070c;
+            padding: 50px 0 30px;
+            border-top: 1px solid rgba(59,130,246,0.2);
+        }
+        @media (max-width: 950px) {
+            .hero-grid { grid-template-columns: 1fr; text-align: center; }
+            .nav-links { gap: 20px; justify-content: center; margin-top: 12px; }
+            .nav-flex { flex-direction: column; }
+            h2 { font-size: 2.2rem; }
+        }
+        .glow-button {
+            background: rgba(59,130,246,0.2);
+            backdrop-filter: blur(8px);
+        }
+        .social-icon {
+            font-size: 1.6rem;
+            margin-right: 20px;
+            color: #8aa3cc;
+            transition: 0.2s;
+        }
+        .social-icon:hover { color: white; text-shadow: 0 0 8px #3b82f6; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container nav-flex">
+        <div class="logo"><i class="fas fa-shield-virus"></i> NIDSense</div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#detection">Detection</a>
+            <a href="#contactSection">Contact</a>
+            <div class="nav-buttons">
+                <button class="btn-outline-glass" id="navLoginBtn">Login</button>
+                <button class="btn-primary-glow" id="navRegisterBtn">Register</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main>
+    <!-- Hero -->
+    <section id="home" class="hero">
+        <div class="container hero-grid">
+            <div class="hero-content" data-animate="fadeUp">
+                <h1>Protect Your Network with <span style="background: linear-gradient(125deg,#b1c5ff,#3b82f6); -webkit-background-clip:text; background-clip:text; color:transparent;">Neural Intrusion Shield</span></h1>
+                <p>AI-powered 24/7 threat hunting · Zero-day anomaly detection · Enterprise-grade proactive defense.</p>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <button class="btn-primary-glow" id="heroGetStarted" style="padding: 12px 32px;">Get Started <i class="fas fa-arrow-right"></i></button>
+                    <button class="btn-outline-glass" id="heroLiveDemo" style="padding: 12px 32px;">Live Demo <i class="fas fa-play"></i></button>
+                </div>
+            </div>
+            <div class="robot-3d-container" id="threeCanvasContainer"></div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about">
+        <div class="container">
+            <h2>About NIDS</h2>
+            <div style="display: flex; gap: 35px; flex-wrap: wrap; margin-top: 40px;">
+                <div class="card-neumorph" style="flex:1;"><i class="fas fa-network-wired"></i><h3>What is NIDS?</h3><p>Network Intrusion Detection System (NIDS) performs deep packet inspection & real-time traffic analysis to detect cyber threats instantly.</p></div>
+                <div class="card-neumorph" style="flex:1;"><i class="fas fa-shield-halos"></i><h3>Why important?</h3><p>Early breach detection, compliance (PCI-DSS, HIPAA), zero-day prevention and automated incident response across hybrid environments.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+        <div class="container">
+            <h2>Key Features</h2>
+            <div class="section-subhead">Next-level network visibility with real-time intelligence</div>
+            <div class="features-grid">
+                <div class="card-neumorph"><i class="fas fa-eye"></i><h3>Real-Time Monitoring</h3><p>Live traffic dissection & session reconstruction with millisecond latency.</p></div>
+                <div class="card-neumorph"><i class="fas fa-biohazard"></i><h3>Threat Detection</h3><p>Signature & heuristic analysis, plus ML based behavioral modeling.</p></div>
+                <div class="card-neumorph"><i class="fas fa-bell"></i><h3>Alerts Generation</h3><p>Customizable alerts via SIEM, Slack, PagerDuty, or webhooks.</p></div>
+                <div class="card-neumorph"><i class="fas fa-chart-line"></i><h3>Reports & Analytics</h3><p>Automated executive summaries & forensic evidence packages.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detection Methods -->
+    <section id="detection">
+        <div class="container">
+            <h2>Detection Methods</h2>
+            <div class="methods-grid">
+                <div class="card-neumorph"><i class="fas fa-fingerprint"></i><h3>Signature-Based</h3><p>Matches known threat patterns with ultra-fast pattern matching.</p></div>
+                <div class="card-neumorph"><i class="fas fa-chart-simple"></i><h3>Anomaly-Based</h3><p>Deep learning models detect zero-day & stealthy anomalies.</p></div>
+                <div class="card-neumorph"><i class="fas fa-microchip"></i><h3>Hybrid Detection</h3><p>Combined approach = higher accuracy & low false positives.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Comparison -->
+    <section id="tools">
+        <div class="container">
+            <h2>Tools Comparison</h2>
+            <div class="tools-grid">
+                <div class="card-neumorph"><i class="fas fa-bolt"></i><h3>Snort</h3><p>Lightweight, rule-based IDS/IPS, huge community ruleset.</p></div>
+                <div class="card-neumorph"><i class="fas fa-tachometer-alt"></i><h3>Suricata</h3><p>Multi-threaded, GPU acceleration, next-gen protocol detection.</p></div>
+                <div class="card-neumorph"><i class="fas fa-database"></i><h3>Zeek</h3><p>Powerful network analysis framework, deep metadata insights.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Alert Demo -->
+    <section id="demo">
+        <div class="container">
+            <h2>Live Alert Demo</h2>
+            <div class="alert-strip">
+                <div class="alert-item"><i class="fas fa-skull-crossbones" style="color:#f97316;"></i> <strong>CRITICAL:</strong> Cobalt Strike beacon detected from 10.12.45.2 → 12:47:23 UTC</div>
+                <div class="alert-item"><i class="fas fa-bug" style="color:#dc2626;"></i> <strong>MALICIOUS:</strong> ET TROJAN SUNBURST variant outbound request blocked.</div>
+                <div class="alert-item"><i class="fas fa-chart-line"></i> <strong>ANOMALY:</strong> Data exfiltration attempt (+680% traffic to darknet IP)</div>
+                <div class="chart-bar">
+                    <h4>Attack telemetry (last 24h)</h4>
+                    <div>Brute-force <div class="bar-fill" data-width="82"></div></div>
+                    <div>Web Attacks <div class="bar-fill" data-width="57"></div></div>
+                    <div>Malware C2 <div class="bar-fill" data-width="68"></div></div>
+                    <div>Port Scanning <div class="bar-fill" data-width="43"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team -->
+    <section id="team">
+        <div class="container">
+            <h2>Core Team</h2>
+            <div class="team-grid">
+                <div class="card-neumorph"><i class="fas fa-user-astronaut"></i><h3>Alex Chen</h3><p>Lead Security Architect</p></div>
+                <div class="card-neumorph"><i class="fas fa-user-secret"></i><h3>Jordan Riley</h3><p>Threat Intelligence</p></div>
+                <div class="card-neumorph"><i class="fas fa-brain"></i><h3>Taylor Kim</h3><p>ML & Detection Eng.</p></div>
+                <div class="card-neumorph"><i class="fas fa-chalkboard-user"></i><h3>Dr. Sarah Voss</h3><p>Project Supervisor</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section with modal trigger -->
+    <section id="contactSection">
+        <div class="container" style="text-align: center;">
+            <h2>Get in Touch</h2>
+            <p style="margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">Our security experts are ready to assist with deployment, POC, and customized solutions.</p>
+            <button class="contact-trigger-btn" id="openContactModalBtn"><i class="fas fa-envelope"></i> Send us a message</button>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 30px;">
+        <div><i class="fas fa-shield-halos"></i> NIDSense<br><span style="font-size: 0.8rem;">© 2025 Advanced Threat Defense Platform</span></div>
+        <div class="social-links">
+            <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
+        </div>
+        <div><span>Quick Links: <a href="#home" style="color:#8bb4ff;">Home</a> | <a href="#features" style="color:#8bb4ff;">Features</a> | <a href="#detection" style="color:#8bb4ff;">Detection</a></span></div>
+    </div>
+</footer>
+
+<!-- LOGIN & REGISTER MODALS -->
+<div id="loginModal" class="modal-premium">
+    <div class="modal-container">
+        <span class="close-modal-btn" id="closeLoginModalBtn">&times;</span>
+        <h3><i class="fas fa-key"></i> Welcome Back</h3>
+        <input type="email" placeholder="Email address" id="loginEmailInput">
+        <input type="password" placeholder="Password" id="loginPasswordInput">
+        <button class="btn-primary-glow" id="loginSubmitBtn" style="width:100%; margin-top: 12px;">Sign In</button>
+        <p style="margin-top: 18px; font-size:0.8rem; text-align:center;">Demo access — any credentials work</p>
+    </div>
+</div>
+
+<div id="registerModal" class="modal-premium">
+    <div class="modal-container">
+        <span class="close-modal-btn" id="closeRegisterModalBtn">&times;</span>
+        <h3><i class="fas fa-user-plus"></i> Create Account</h3>
+        <input type="text" placeholder="Full Name" id="regFullName">
+        <input type="email" placeholder="Email" id="regEmailAddr">
+        <input type="password" placeholder="Password" id="regPass">
+        <button class="btn-primary-glow" id="registerSubmitBtn" style="width:100%;">Register</button>
+    </div>
+</div>
+
+<!-- CONTACT MODAL (extra professional) -->
+<div id="contactModal" class="modal-premium">
+    <div class="modal-container">
+        <span class="close-modal-btn" id="closeContactModalBtn">&times;</span>
+        <h3><i class="fas fa-comment-dots"></i> Contact Support</h3>
+        <input type="text" id="contactNameField" placeholder="Your Name">
+        <input type="email" id="contactEmailField" placeholder="Email Address">
+        <textarea rows="4" id="contactMessageField" placeholder="Write your message..."></textarea>
+        <button class="btn-primary-glow" id="sendContactFormBtn" style="width:100%;">Send Message <i class="fas fa-paper-plane"></i></button>
+        <div id="contactFormFeedback" style="margin-top: 14px; font-size:0.85rem; text-align:center;"></div>
+    </div>
+</div>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js';
+    
+    const container = document.getElementById('threeCanvasContainer');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050b17);
+    scene.fog = new THREE.FogExp2(0x050b17, 0.012);
+    const camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(3.8, 2.2, 6.5);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.5;
+    controls.enableZoom = false;
+    controls.enablePan = false;
+    controls.target.set(0, 0.4, 0);
+    
+    // Lighting
+    const ambient = new THREE.AmbientLight(0x222233);
+    scene.add(ambient);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    mainLight.position.set(3, 5, 2);
+    mainLight.castShadow = true;
+    scene.add(mainLight);
+    const fillLight = new THREE.PointLight(0x3b82f6, 0.45);
+    fillLight.position.set(1, 2, 2.5);
+    scene.add(fillLight);
+    const rimLight = new THREE.PointLight(0xff6633, 0.4);
+    rimLight.position.set(-1, 1.2, -3);
+    scene.add(rimLight);
+    
+    const robotGroup = new THREE.Group();
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x2c3e66, metalness: 0.9, roughness: 0.2, emissive: 0x111133 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.15, 1.45, 0.9), metalMat);
+    body.castShadow = true;
+    body.position.y = -0.2;
+    robotGroup.add(body);
+    const headGeo = new THREE.SphereGeometry(0.68, 48, 48);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0x3e5e9e, metalness: 0.7, roughness: 0.25 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.y = 0.78;
+    robotGroup.add(head);
+    const visorMat = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x0088aa, emissiveIntensity: 0.7 });
+    const visor = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.26, 0.2), visorMat);
+    visor.position.set(0, 0.8, 0.64);
+    robotGroup.add(visor);
+    const eyeMat = new THREE.MeshStandardMaterial({ color: 0xff4422, emissive: 0xff2200 });
+    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 24), eyeMat);
+    eyeL.position.set(-0.25, 0.95, 0.71);
+    robotGroup.add(eyeL);
+    const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 24), eyeMat);
+    eyeR.position.set(0.25, 0.95, 0.71);
+    robotGroup.add(eyeR);
+    const antennaMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x442200 });
+    const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.5, 8), antennaMat);
+    antenna.position.set(0, 1.24, 0);
+    robotGroup.add(antenna);
+    const orbRing = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), new THREE.MeshStandardMaterial({ color: 0x33aaff, emissive: 0x2266aa }));
+    orbRing.position.set(0.55, -0.05, 0.75);
+    robotGroup.add(orbRing);
+    scene.add(robotGroup);
+    const grid = new THREE.GridHelper(12, 24, 0x3388ff, 0x225588);
+    grid.position.y = -1.05;
+    grid.material.transparent = true;
+    grid.material.opacity = 0.25;
+    scene.add(grid);
+    const particles = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ color: 0x88aaff, size: 0.045 }));
+    const posArray = new Float32Array(500 * 3);
+    for (let i=0; i<500; i++) { posArray[i*3] = (Math.random() - 0.5) * 16; posArray[i*3+1] = (Math.random() - 0.5)*5; posArray[i*3+2] = (Math.random()-0.5)*12 -4; }
+    particles.geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    scene.add(particles);
+    
+    function animateRobot() {
+        requestAnimationFrame(animateRobot);
+        controls.update();
+        const t = Date.now() * 0.003;
+        eyeL.material.emissiveIntensity = 0.5 + Math.sin(t * 10) * 0.4;
+        eyeR.material.emissiveIntensity = 0.5 + Math.sin(t * 10) * 0.4;
+        robotGroup.position.y = Math.sin(t * 1.8) * 0.025;
+        particles.rotation.y = t * 0.03;
+        renderer.render(scene, camera);
+    }
+    animateRobot();
+    window.addEventListener('resize', () => { const w = container.clientWidth, h = container.clientHeight; camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h); });
+</script>
+
+<script>
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.from(".hero-content", { duration: 1, y: 50, opacity: 0, ease: "power3.out" });
+    gsap.utils.toArray(".card-neumorph").forEach((card, i) => {
+        gsap.from(card, { scrollTrigger: { trigger: card, start: "top 85%" }, duration: 0.6, y: 40, opacity: 0, delay: i * 0.08 });
+    });
+    // bar animation on demo section
+    const bars = document.querySelectorAll('.bar-fill');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { if(entry.isIntersecting) { entry.target.style.width = entry.target.getAttribute('data-width') + '%'; } });
+    }, { threshold: 0.3 });
+    bars.forEach(bar => observer.observe(bar));
+    
+    // Modal handling: login, register, contact
+    const loginModal = document.getElementById('loginModal');
+    const registerModal = document.getElementById('registerModal');
+    const contactModal = document.getElementById('contactModal');
+    const openLogin = document.getElementById('navLoginBtn');
+    const openRegister = document.getElementById('navRegisterBtn');
+    const openContactBtn = document.getElementById('openContactModalBtn');
+    const closeLoginBtn = document.getElementById('closeLoginModalBtn');
+    const closeRegisterBtn = document.getElementById('closeRegisterModalBtn');
+    const closeContactBtn = document.getElementById('closeContactModalBtn');
+    function showModal(modal) { modal.style.display = 'flex'; gsap.fromTo(modal.querySelector('.modal-container'), { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 }); }
+    function hideModal(modal) { modal.style.display = 'none'; }
+    openLogin.onclick = () => showModal(loginModal);
+    openRegister.onclick = () => showModal(registerModal);
+    openContactBtn.onclick = () => showModal(contactModal);
+    closeLoginBtn.onclick = () => hideModal(loginModal);
+    closeRegisterBtn.onclick = () => hideModal(registerModal);
+    closeContactBtn.onclick = () => hideModal(contactModal);
+    window.onclick = (e) => { if(e.target === loginModal) hideModal(loginModal); if(e.target === registerModal) hideModal(registerModal); if(e.target === contactModal) hideModal(contactModal); };
+    document.getElementById('loginSubmitBtn').onclick = () => { alert("Logged in (Demo Mode) — Redirect to dashboard."); hideModal(loginModal); };
+    document.getElementById('registerSubmitBtn').onclick = () => { alert("Account created! Explore NeuralShield."); hideModal(registerModal); };
+    document.getElementById('sendContactFormBtn').onclick = () => {
+        const name = document.getElementById('contactNameField').value;
+        const email = document.getElementById('contactEmailField').value;
+        const msg = document.getElementById('contactMessageField').value;
+        const feedback = document.getElementById('contactFormFeedback');
+        if(name && email && msg) { feedback.innerHTML = "✔️ Message delivered! Our security team will reply shortly."; feedback.style.color = "#8bc34a"; setTimeout(()=>{ hideModal(contactModal); }, 1800); }
+        else { feedback.innerHTML = "❌ Please fill all fields."; feedback.style.color = "#ff8888"; }
+    };
+    document.getElementById('heroGetStarted').onclick = () => showModal(contactModal);
+    document.getElementById('heroLiveDemo').onclick = () => document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+    document.querySelectorAll('.nav-links a').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if(href && href !== '#') { e.preventDefault(); document.querySelector(href).scrollIntoView({ behavior: 'smooth' }); }
+        });
+    });
+</script>
+</body>
+</html>
